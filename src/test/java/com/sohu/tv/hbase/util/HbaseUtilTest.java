@@ -1,35 +1,32 @@
 package com.sohu.tv.hbase.util;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Connection;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sohu.tv.hbase.bean.CustomHbaseModel;
 
 /**
+ * hbase相关api测试
+ * 
  * @author leifu
  * @Date 2016年4月29日
  * @Time 下午4:35:38
  */
 public class HbaseUtilTest {
 
-    public TableName tableName = TableName.valueOf("video_test");
+    private Logger logger = LoggerFactory.getLogger(HbaseUtilTest.class);
 
-    private Connection connection;
-
+    public final String tableName = "video_test";
     private final byte[] family = Bytes.toBytes("p");
 
-    public HbaseUtilTest() {
-        connection = HbaseUtil.HBASE_BX.getConnection();
-    }
-    
     @Test
     public void testCheckConfig() {
         boolean success = HbaseUtil.HBASE_BX.checkConfig();
@@ -37,70 +34,55 @@ public class HbaseUtilTest {
     }
 
     @Test
-    public void testPut() throws IOException {
-        Table table = null;
-        try {
-            table = connection.getTable(tableName);
-            byte[] rowKey = Bytes.toBytes("vid:1");
-            byte[] qualifier = Bytes.toBytes("name");
-            byte[] value = Bytes.toBytes("hahahahahha");
-            Put put = new Put(rowKey);
-            put.addColumn(family, qualifier, value);
-            table.put(put);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (table != null) {
-                table.close();
-            }
-        }
+    public void testPut() throws Exception {
+        byte[] rowKey = Bytes.toBytes("vid:1");
+        byte[] qualifier = Bytes.toBytes("info");
+        byte[] value = Bytes.toBytes("testInfo");
+        HbaseUtil.HBASE_BX.put(tableName, CustomHbaseModel.getPutModel(rowKey, family, qualifier, value));
     }
 
     @Test
-    public void testBatchPut() throws IOException {
-        Table table = null;
-        try {
-            List<Put> puts = new ArrayList<Put>();
-            table = connection.getTable(tableName);
-            for (int i = 0; i < 100; i++) {
-                byte[] rowKey = Bytes.toBytes("vid:" + i);
-                byte[] qualifier = Bytes.toBytes("name" + i);
-                byte[] value = Bytes.toBytes("testValue" + i);
-                Put put = new Put(rowKey);
-                put.addColumn(family, qualifier, value);
-                puts.add(put);
-            }
-            table.put(puts);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (table != null) {
-                table.close();
-            }
+    public void testBatchPut() throws Exception {
+        List<CustomHbaseModel> customHbaseModelList = new ArrayList<CustomHbaseModel>();
+        for (int i = 0; i < 100; i++) {
+            byte[] rowKey = Bytes.toBytes("vid:" + i);
+            byte[] qualifier = Bytes.toBytes("name" + i);
+            byte[] value = Bytes.toBytes("testValue" + i);
+            customHbaseModelList.add(CustomHbaseModel.getPutModel(rowKey, family, qualifier, value));
         }
+        HbaseUtil.HBASE_BX.batchPut(tableName, customHbaseModelList);
     }
 
     @Test
-    public void testGetColumn() throws IOException {
-        Table table = null;
-        try {
-            table = connection.getTable(tableName);
-            byte[] rowKey = Bytes.toBytes("vid:1");
-            Get get = new Get(rowKey);
-            byte[] column = Bytes.toBytes("name");
-            get.addColumn(family, column);
-            Result result = table.get(get);
-            if (!result.isEmpty()) {
-                byte[] value = result.getValue(family, column);
-                System.out.println(Bytes.toString(value));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (table != null) {
-                table.close();
-            }
+    public void testGetColumn() throws Exception {
+        byte[] rowKey = Bytes.toBytes("vid:2");
+        byte[] qualifier = Bytes.toBytes("info");
+        Result result = HbaseUtil.HBASE_BX.get(tableName, rowKey, family, qualifier);
+        printResult(result);
+    }
+
+    @Test
+    public void testGetFamily() throws Exception {
+        byte[] rowKey = Bytes.toBytes("vid:2");
+        Result result = HbaseUtil.HBASE_BX.get(tableName, rowKey, family);
+        printResult(result);
+    }
+
+    private void printResult(Result result) {
+        if (result == null) {
+            return;
+        }
+        String resultRowKey = Bytes.toString(result.getRow());
+        logger.info("resultRowKey: {}", resultRowKey);
+        Cell[] cells = result.rawCells();
+        for (Cell cell : cells) {
+            byte[] rowKeyByte = CellUtil.cloneRow(cell);
+            byte[] familyByte = CellUtil.cloneFamily(cell);
+            byte[] qualifierByte = CellUtil.cloneQualifier(cell);
+            byte[] valueByte = CellUtil.cloneValue(cell);
+            logger.info("rowkey:{}, family:{}, column:{}, value:{}", Bytes.toString(rowKeyByte),
+                    Bytes.toString(familyByte), Bytes.toString(qualifierByte), Bytes.toString(valueByte));
         }
     }
-    
+
 }
