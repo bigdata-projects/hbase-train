@@ -30,7 +30,7 @@ public class HbaseUtilTest {
     @Test
     public void testCheckConfig() {
         boolean success = HbaseUtil.HBASE_BX.checkConfig();
-        System.out.println("check config result is " + success);
+        logger.info("check config result is {}", success);
     }
 
     @Test
@@ -44,7 +44,7 @@ public class HbaseUtilTest {
     @Test
     public void testBatchPut() throws Exception {
         List<CustomHbaseModel> customHbaseModelList = new ArrayList<CustomHbaseModel>();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 1; i <= 10; i++) {
             byte[] rowKey = Bytes.toBytes("vid:" + i);
             byte[] qualifier = Bytes.toBytes("name" + i);
             byte[] value = Bytes.toBytes("testValue" + i);
@@ -56,7 +56,7 @@ public class HbaseUtilTest {
     @Test
     public void testGetColumn() throws Exception {
         byte[] rowKey = Bytes.toBytes("vid:2");
-        byte[] qualifier = Bytes.toBytes("info");
+        byte[] qualifier = Bytes.toBytes("name");
         Result result = HbaseUtil.HBASE_BX.get(tableName, rowKey, family, qualifier);
         printResult(result);
     }
@@ -66,6 +66,13 @@ public class HbaseUtilTest {
         byte[] rowKey = Bytes.toBytes("vid:2");
         Result result = HbaseUtil.HBASE_BX.get(tableName, rowKey, family);
         printResult(result);
+    }
+
+    @Test
+    public void testDel() throws Exception {
+        byte[] rowKey = Bytes.toBytes("vid:2");
+        byte[] qualifier = Bytes.toBytes("name");
+        HbaseUtil.HBASE_BX.delete(tableName, rowKey, family, qualifier);
     }
 
     private void printResult(Result result) {
