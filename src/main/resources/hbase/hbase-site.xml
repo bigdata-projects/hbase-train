@@ -49,4 +49,9 @@
     <name>hbase.regionserver.info.port</name>  
     <value>16030</value> 
   </property>
+  <property>
+    <name>hbase.regionserver.codecs</name>
+    <value>lzo,gz</value>
+    <description>启动regionserver时判断压缩方式是否支持</description>
+  </property>
 </configuration>

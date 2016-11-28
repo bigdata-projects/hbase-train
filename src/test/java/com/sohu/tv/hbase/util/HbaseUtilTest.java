@@ -6,12 +6,13 @@ import java.util.List;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.io.compress.Compression;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.io.compress.Compression;
 import org.apache.hadoop.hbase.regionserver.BloomType;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.zookeeper.server.quorum.CommitProcessor;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public class HbaseUtilTest {
 
     private Logger logger = LoggerFactory.getLogger(HbaseUtilTest.class);
 
-    public final String tableName = "video_test";
+    public final String tableName = "vid223eo_te2s11t";
     private final byte[] family = Bytes.toBytes("p");
 
     @Test
@@ -41,14 +42,15 @@ public class HbaseUtilTest {
     
     @Test
     public void testCreateTable() {
+        
         HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf(tableName));
         HColumnDescriptor cf = new HColumnDescriptor(family);
-//        cf.setCompactionCompressionType(Compression.Algorithm.LZO);
-//        cf.setCompressionType(Compression.Algorithm.LZO);
-//        cf.setMaxVersions(1);
-//        cf.setMinVersions(0);
-//        //布隆过滤器
-//        cf.setBloomFilterType(BloomType.ROW);
+        cf.setCompactionCompressionType(Compression.Algorithm.LZO);
+        cf.setCompressionType(Compression.Algorithm.LZO);
+        cf.setMaxVersions(1);
+        cf.setMinVersions(0);
+        //布隆过滤器
+        cf.setBloomFilterType(BloomType.ROW);
         tableDescriptor.addFamily(cf);
         HbaseUtil.HBASE_TEST.createTableByAutoSplit(tableDescriptor);
         
