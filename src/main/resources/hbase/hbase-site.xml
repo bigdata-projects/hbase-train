@@ -2,7 +2,6 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!--
 /**
- * Copyright 2010 The Apache Software Foundation
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,71 +20,33 @@
  * limitations under the License.
  */
 -->
-<configuration>
-    <property>
-        <name>hbase.zookeeper.quorum</name>
-        <value>10.16.50.142,10.16.50.145,10.16.14.181</value>
-    </property>
-
-    <property>
-        <name>zookeeper.znode.parent</name>
-        <value>/hbase_1_0</value>
-    </property>
-    <property>
-        <name>hbase.rootdir</name>
-        <value>hdfs://hbasecluster/hbase</value>
-    </property>
-    <property>
-        <name>hbase.cluster.distributed</name>
-        <value>true</value>
-        <description>The mode the cluster will be in. Possible values are
-            false: standalone and pseudo-distributed setups with managed Zookeeper
-            true: fully-distributed with unmanaged Zookeeper Quorum (see hbase-env.sh)
-        </description>
-    </property>
-    <property>
-        <name>hbase.rpc.timeout</name>
-        <value>2000</value>
-        <description>
-            针对客户端有效。太小容易造成millis timeout while waiting for channel to be ready for read. ch
-        </description>
-    </property>
-
-    <property>
-        <name>hbase.client.pause</name>
-        <value>1000</value>
-        <description>
-            默认1000ms,客户端被阻塞或者失败后重试间隔,间隔为指数避让,即
-            1,1,1,2,2,4,4,8,16,32 ,建议改下这个值,同时加大重试次数,避免 split 造成客
-            户端响应时间过长以及失败率增加。
-        </description>
-    </property>
-    <property>
-        <name>hbase.client.retries.number</name>
-        <value>2</value>
-        <description>
-            默认为 10 次,决定了客户端的重试次数
-        </description>
-    </property>
-    <property>
-        <name>hbase.ipc.client.tcpnodelay</name>
-        <value>true</value>
-        <description>
-            默认 tcp 的 no delay 是 false ,建议修改为 true
-        </description>
-    </property>
-    <property>
-        <name>ipc.ping.interval</name>
-        <value>3000</value>
-        <description>
-            RPC 等待服务端响应的超时时间,默认为 1 分钟,有点太长了,建议改成 3 秒( 3000 )
-        </description>
-    </property>
-    <property>
-        <name>hbase.client.scanner.timeout.period</name>
-        <value>10000</value>
-        <description>
-            scanner的失效时间
-        </description>
-    </property>
+<configuration> 
+  <property> 
+    <name>hbase.rootdir</name>  
+    <value>file:///opt/hbase/data</value> 
+  </property>
+  <property> 
+    <name>hbase.cluster.distributed</name>  
+    <value>true</value> 
+  </property>
+  <property> 
+    <name>hbase.zookeeper.quorum</name>  
+    <value>10.16.14.182</value> 
+  </property>  
+  <property> 
+    <name>zookeeper.znode.parent</name>  
+    <value>/hbase</value> 
+  </property>  
+  <property> 
+    <name>hbase.zookeeper.property.clientPort</name>  
+    <value>2181</value> 
+  </property>  
+  <property> 
+    <name>hbase.regionserver.port</name>  
+    <value>16020</value> 
+  </property>  
+  <property> 
+    <name>hbase.regionserver.info.port</name>  
+    <value>16030</value> 
+  </property>
 </configuration>

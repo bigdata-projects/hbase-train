@@ -5,7 +5,12 @@ import java.util.List;
 
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
+import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.io.compress.Compression;
+import org.apache.hadoop.hbase.regionserver.BloomType;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -29,8 +34,24 @@ public class HbaseUtilTest {
 
     @Test
     public void testCheckConfig() {
-        boolean success = HbaseUtil.HBASE_BX.checkConfig();
+        boolean success = HbaseUtil.HBASE_TEST.checkConfig();
         logger.info("check config result is {}", success);
+    }
+    
+    
+    @Test
+    public void testCreateTable() {
+        HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf(tableName));
+        HColumnDescriptor cf = new HColumnDescriptor(family);
+//        cf.setCompactionCompressionType(Compression.Algorithm.LZO);
+//        cf.setCompressionType(Compression.Algorithm.LZO);
+//        cf.setMaxVersions(1);
+//        cf.setMinVersions(0);
+//        //布隆过滤器
+//        cf.setBloomFilterType(BloomType.ROW);
+        tableDescriptor.addFamily(cf);
+        HbaseUtil.HBASE_TEST.createTableByAutoSplit(tableDescriptor);
+        
     }
 
     @Test
@@ -38,7 +59,7 @@ public class HbaseUtilTest {
         byte[] rowKey = Bytes.toBytes("vid:1");
         byte[] qualifier = Bytes.toBytes("info");
         byte[] value = Bytes.toBytes("testInfo");
-        HbaseUtil.HBASE_BX.put(tableName, CustomHbaseModel.getPutModel(rowKey, family, qualifier, value));
+        HbaseUtil.HBASE_TEST.put(tableName, CustomHbaseModel.getPutModel(rowKey, family, qualifier, value));
     }
 
     @Test
@@ -50,21 +71,21 @@ public class HbaseUtilTest {
             byte[] value = Bytes.toBytes("testValue" + i);
             customHbaseModelList.add(CustomHbaseModel.getPutModel(rowKey, family, qualifier, value));
         }
-        HbaseUtil.HBASE_BX.batchPut(tableName, customHbaseModelList);
+        HbaseUtil.HBASE_TEST.batchPut(tableName, customHbaseModelList);
     }
 
     @Test
     public void testGetColumn() throws Exception {
         byte[] rowKey = Bytes.toBytes("vid:2");
         byte[] qualifier = Bytes.toBytes("name");
-        Result result = HbaseUtil.HBASE_BX.get(tableName, rowKey, family, qualifier);
+        Result result = HbaseUtil.HBASE_TEST.get(tableName, rowKey, family, qualifier);
         printResult(result);
     }
 
     @Test
     public void testGetFamily() throws Exception {
         byte[] rowKey = Bytes.toBytes("vid:2");
-        Result result = HbaseUtil.HBASE_BX.get(tableName, rowKey, family);
+        Result result = HbaseUtil.HBASE_TEST.get(tableName, rowKey, family);
         printResult(result);
     }
 
@@ -72,7 +93,7 @@ public class HbaseUtilTest {
     public void testDel() throws Exception {
         byte[] rowKey = Bytes.toBytes("vid:2");
         byte[] qualifier = Bytes.toBytes("name");
-        HbaseUtil.HBASE_BX.delete(tableName, rowKey, family, qualifier);
+        HbaseUtil.HBASE_TEST.delete(tableName, rowKey, family, qualifier);
     }
 
     private void printResult(Result result) {

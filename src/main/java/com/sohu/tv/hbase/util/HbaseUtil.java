@@ -16,7 +16,10 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.TableExistsException;
 import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
@@ -39,7 +42,7 @@ import com.sohu.tv.hbase.bean.CustomHbaseModel;
  * @Time 下午4:27:27
  */
 public enum HbaseUtil {
-    HBASE_BX(HbaseUtil.MAJOR_HBASE_SITE);
+    HBASE_TEST(HbaseUtil.MAJOR_HBASE_SITE);
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -68,6 +71,56 @@ public enum HbaseUtil {
             return false;
         }
     }
+    
+    
+    public boolean createTableByAutoSplit(HTableDescriptor table) {
+        Admin admin = null;
+        try {
+            admin = connection.getAdmin();
+            admin.createTable(table);
+            return true;
+        } catch (TableExistsException e) {
+            logger.error(e.getMessage(), e);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            if (admin != null) {
+                try {
+                    admin.close();
+                } catch (IOException e) {
+                    logger.error(e.getMessage(), e);
+                }
+            }
+        }
+        return false;
+    }
+    
+    public boolean createTableByManualSplit(HTableDescriptor table, byte[][] splits) {
+        Admin admin = null;
+        try {
+            admin = connection.getAdmin();
+            admin.createTable(table, splits);
+            return true;
+        } catch (TableExistsException e) {
+            logger.error(e.getMessage(), e);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            if (admin != null) {
+                try {
+                    admin.close();
+                } catch (IOException e) {
+                    logger.error(e.getMessage(), e);
+                }
+            }
+        }
+        return false;
+    }
+    
 
     public void put(String tableName, CustomHbaseModel customHbaseModel) throws Exception {
         if (customHbaseModel == null) {
